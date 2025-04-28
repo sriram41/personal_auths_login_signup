@@ -1,18 +1,20 @@
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
-import AuthRoute from './components/AuthRoute';
 import Home from './components/pages/Home';
 import About from './components/pages/About';
 import Login from './components/pages/Login';
 import Signup from './components/pages/Signup';
 
+// Base API URL - points to your Render backend
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 
+  'https://personal-auths-login-signup.onrender.com';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Check auth status on initial load
   useEffect(() => {
     const token = localStorage.getItem('token');
     setIsAuthenticated(!!token);
@@ -31,7 +33,7 @@ function App() {
           isAuthenticated ? (
             <Navigate to="/" replace />
           ) : (
-            <Login setIsAuthenticated={setIsAuthenticated} />
+            <Login setIsAuthenticated={setIsAuthenticated} apiBaseUrl={API_BASE_URL} />
           )
         } />
         
@@ -39,7 +41,7 @@ function App() {
           isAuthenticated ? (
             <Navigate to="/" replace />
           ) : (
-            <Signup setIsAuthenticated={setIsAuthenticated} />
+            <Signup setIsAuthenticated={setIsAuthenticated} apiBaseUrl={API_BASE_URL} />
           )
         } />
 
@@ -74,6 +76,23 @@ export default App;
 
 
 
+
+
+
+
+
+
+
+// import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+// import { useState, useEffect } from 'react';
+// import Navbar from './components/Navbar';
+// import AuthRoute from './components/AuthRoute';
+// import Home from './components/pages/Home';
+// import About from './components/pages/About';
+// import Login from './components/pages/Login';
+// import Signup from './components/pages/Signup';
+
+
 // function App() {
 //   const [isAuthenticated, setIsAuthenticated] = useState(false);
 //   const [loading, setLoading] = useState(true);
@@ -86,98 +105,164 @@ export default App;
 //   }, []);
 
 //   if (loading) {
-//     return <div>Loading...</div>; // Or a proper loading spinner
+//     return <div>Loading...</div>;
 //   }
 
 //   return (
 //     <Router>
+//       <Routes>
+//         {/* Public routes without Navbar */}
+//         <Route path="/login" element={
+//           isAuthenticated ? (
+//             <Navigate to="/" replace />
+//           ) : (
+//             <Login setIsAuthenticated={setIsAuthenticated} />
+//           )
+//         } />
+        
+//         <Route path="/signup" element={
+//           isAuthenticated ? (
+//             <Navigate to="/" replace />
+//           ) : (
+//             <Signup setIsAuthenticated={setIsAuthenticated} />
+//           )
+//         } />
+
+//         {/* Routes with Navbar */}
+//         <Route path="*" element={
+//           <>
+//             <Navbar isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />
+//             <Routes>
+//               <Route path="/about" element={<About />} />
+              
+//               <Route path="/" element={
+//                 isAuthenticated ? (
+//                   <Home />
+//                 ) : (
+//                   <Navigate to="/login" replace />
+//                 )
+//               } />
+              
+//               <Route path="*" element={
+//                 <Navigate to={isAuthenticated ? "/" : "/login"} replace />
+//               } />
+//             </Routes>
+//           </>
+//         } />
+//       </Routes>
+//     </Router>
+//   );
+// }
+
+// export default App;
+
+
+
+
+// // function App() {
+// //   const [isAuthenticated, setIsAuthenticated] = useState(false);
+// //   const [loading, setLoading] = useState(true);
+
+// //   // Check auth status on initial load
+// //   useEffect(() => {
+// //     const token = localStorage.getItem('token');
+// //     setIsAuthenticated(!!token);
+// //     setLoading(false);
+// //   }, []);
+
+// //   if (loading) {
+// //     return <div>Loading...</div>; // Or a proper loading spinner
+// //   }
+
+// //   return (
+// //     <Router>
      
-//       <Routes>
-//         {/* Public routes */}
-//         <Route path="/about" element={<About />} />
+// //       <Routes>
+// //         {/* Public routes */}
+// //         <Route path="/about" element={<About />} />
         
-//         {/* Auth routes */}
-//         <Route 
-//           path="/login" 
-//           element={
-//             isAuthenticated ? (
-//               <Navigate to="/" replace />
-//             ) : (
-//               <Login setIsAuthenticated={setIsAuthenticated} />
-//             )
-//           } 
-//         />
-//         <Route 
-//           path="/signup" 
-//           element={
-//             isAuthenticated ? (
-//               <Navigate to="/" replace />
-//             ) : (
-//               <Signup setIsAuthenticated={setIsAuthenticated} />
-//             )
-//           } 
-//         />
+// //         {/* Auth routes */}
+// //         <Route 
+// //           path="/login" 
+// //           element={
+// //             isAuthenticated ? (
+// //               <Navigate to="/" replace />
+// //             ) : (
+// //               <Login setIsAuthenticated={setIsAuthenticated} />
+// //             )
+// //           } 
+// //         />
+// //         <Route 
+// //           path="/signup" 
+// //           element={
+// //             isAuthenticated ? (
+// //               <Navigate to="/" replace />
+// //             ) : (
+// //               <Signup setIsAuthenticated={setIsAuthenticated} />
+// //             )
+// //           } 
+// //         />
         
-//         {/* Protected route */}
+// //         {/* Protected route */}
    
-//         <Route
-//           path="/"
-//           element={
-//             isAuthenticated ? (
-//               <Home />
-//             ) : (
-//               <Navigate to="/login" replace />
-//             )
-//           }
-//         />
+// //         <Route
+// //           path="/"
+// //           element={
+// //             isAuthenticated ? (
+// //               <Home />
+// //             ) : (
+// //               <Navigate to="/login" replace />
+// //             )
+// //           }
+// //         />
         
-//         {/* Catch-all redirect */}
-//         <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />} />
-//       </Routes>
-//     </Router>
-//   );
-// }
+// //         {/* Catch-all redirect */}
+// //         <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />} />
+// //       </Routes>
+// //     </Router>
+// //   );
+// // }
 
-// export default App;
-
-
+// // export default App;
 
 
 
 
-// import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-// import { useState } from 'react';
-// import Navbar from './components/Navbar';
 
-// import AuthRoute from './components/AuthRoute';
-// import Home from './components/pages/Home';
-// import About from './components/pages/About';
-// import Login from './components/pages/Login';
-// import Signup from './components/pages/Signup';
 
-// function App() {
-//   const [isAuthenticated, setIsAuthenticated] = useState(
-//     localStorage.getItem('token') ? true : false
-//   );
+// // import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+// // import { useState } from 'react';
+// // import Navbar from './components/Navbar';
 
-//   return (
-//     <Router>
-//       <Navbar isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />
-//       <Routes>
-//         <Route path="/about" element={<About />} />
-//         <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
-//         <Route path="/signup" element={<Signup setIsAuthenticated={setIsAuthenticated} />} />
-//         <Route
-//           path="/"
-//           element={
-//             <AuthRoute isAuthenticated={isAuthenticated}>
-//               <Home />
-//             </AuthRoute>
-//           }
-//         />
-//       </Routes>
-//     </Router>
-//   );
-// }
+// // import AuthRoute from './components/AuthRoute';
+// // import Home from './components/pages/Home';
+// // import About from './components/pages/About';
+// // import Login from './components/pages/Login';
+// // import Signup from './components/pages/Signup';
 
-// export default App;
+// // function App() {
+// //   const [isAuthenticated, setIsAuthenticated] = useState(
+// //     localStorage.getItem('token') ? true : false
+// //   );
+
+// //   return (
+// //     <Router>
+// //       <Navbar isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />
+// //       <Routes>
+// //         <Route path="/about" element={<About />} />
+// //         <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
+// //         <Route path="/signup" element={<Signup setIsAuthenticated={setIsAuthenticated} />} />
+// //         <Route
+// //           path="/"
+// //           element={
+// //             <AuthRoute isAuthenticated={isAuthenticated}>
+// //               <Home />
+// //             </AuthRoute>
+// //           }
+// //         />
+// //       </Routes>
+// //     </Router>
+// //   );
+// // }
+
+// // export default App;
