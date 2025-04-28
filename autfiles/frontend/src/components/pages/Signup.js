@@ -4,7 +4,7 @@ import axios from 'axios';
 import './Signup.css';
 import '../../styles/auth.css';
 
-const Signup = ({ setIsAuthenticated, apiBaseUrl }) => {
+const Signup = ({ setIsAuthenticated }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,11 +29,22 @@ const Signup = ({ setIsAuthenticated, apiBaseUrl }) => {
     }
   
     try {
-      const response = await axios.post(`${apiBaseUrl}/api/signup`, {
-        name,
-        email,
-        password
-      });
+      console.log('Attempting signup...');
+      const response = await axios.post(
+        'https://personal-auths-login-signup.onrender.com/api/signup', 
+        {
+          name,
+          email,
+          password
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      console.log('Signup successful:', response.data);
       
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify({
@@ -42,9 +53,19 @@ const Signup = ({ setIsAuthenticated, apiBaseUrl }) => {
       }));
       setIsAuthenticated(true);
     } catch (err) {
-      const errorMessage = err.response?.data?.message || 
-                         err.message || 
-                         'Signup failed';
+      console.error('Full error object:', err);
+      console.error('Error response:', err.response);
+      
+      let errorMessage = 'Signup failed';
+      if (err.response) {
+        errorMessage = err.response.data?.message || 
+                     `Server error: ${err.response.status}`;
+      } else if (err.request) {
+        errorMessage = 'No response from server - check your network connection';
+      } else {
+        errorMessage = err.message || 'Request setup error';
+      }
+      
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -106,7 +127,6 @@ const Signup = ({ setIsAuthenticated, apiBaseUrl }) => {
 };
 
 export default Signup;
-
 
 
 
