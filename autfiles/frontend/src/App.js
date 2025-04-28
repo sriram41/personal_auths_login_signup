@@ -24,7 +24,7 @@ function App() {
 
   return (
     <Router>
-      <Navbar isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />
+     
       <Routes>
         {/* Public routes */}
         <Route path="/about" element={<About />} />
