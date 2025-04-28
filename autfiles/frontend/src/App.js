@@ -7,6 +7,7 @@ import About from './components/pages/About';
 import Login from './components/pages/Login';
 import Signup from './components/pages/Signup';
 
+
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -19,59 +20,125 @@ function App() {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>; // Or a proper loading spinner
+    return <div>Loading...</div>;
   }
 
   return (
     <Router>
-     
       <Routes>
-        {/* Public routes */}
-        <Route path="/about" element={<About />} />
+        {/* Public routes without Navbar */}
+        <Route path="/login" element={
+          isAuthenticated ? (
+            <Navigate to="/" replace />
+          ) : (
+            <Login setIsAuthenticated={setIsAuthenticated} />
+          )
+        } />
         
-        {/* Auth routes */}
-        <Route 
-          path="/login" 
-          element={
-            isAuthenticated ? (
-              <Navigate to="/" replace />
-            ) : (
-              <Login setIsAuthenticated={setIsAuthenticated} />
-            )
-          } 
-        />
-        <Route 
-          path="/signup" 
-          element={
-            isAuthenticated ? (
-              <Navigate to="/" replace />
-            ) : (
-              <Signup setIsAuthenticated={setIsAuthenticated} />
-            )
-          } 
-        />
-        
-        {/* Protected route */}
-   
-        <Route
-          path="/"
-          element={
-            isAuthenticated ? (
-              <Home />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        
-        {/* Catch-all redirect */}
-        <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />} />
+        <Route path="/signup" element={
+          isAuthenticated ? (
+            <Navigate to="/" replace />
+          ) : (
+            <Signup setIsAuthenticated={setIsAuthenticated} />
+          )
+        } />
+
+        {/* Routes with Navbar */}
+        <Route path="*" element={
+          <>
+            <Navbar isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />
+            <Routes>
+              <Route path="/about" element={<About />} />
+              
+              <Route path="/" element={
+                isAuthenticated ? (
+                  <Home />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              } />
+              
+              <Route path="*" element={
+                <Navigate to={isAuthenticated ? "/" : "/login"} replace />
+              } />
+            </Routes>
+          </>
+        } />
       </Routes>
     </Router>
   );
 }
 
 export default App;
+
+
+
+
+// function App() {
+//   const [isAuthenticated, setIsAuthenticated] = useState(false);
+//   const [loading, setLoading] = useState(true);
+
+//   // Check auth status on initial load
+//   useEffect(() => {
+//     const token = localStorage.getItem('token');
+//     setIsAuthenticated(!!token);
+//     setLoading(false);
+//   }, []);
+
+//   if (loading) {
+//     return <div>Loading...</div>; // Or a proper loading spinner
+//   }
+
+//   return (
+//     <Router>
+     
+//       <Routes>
+//         {/* Public routes */}
+//         <Route path="/about" element={<About />} />
+        
+//         {/* Auth routes */}
+//         <Route 
+//           path="/login" 
+//           element={
+//             isAuthenticated ? (
+//               <Navigate to="/" replace />
+//             ) : (
+//               <Login setIsAuthenticated={setIsAuthenticated} />
+//             )
+//           } 
+//         />
+//         <Route 
+//           path="/signup" 
+//           element={
+//             isAuthenticated ? (
+//               <Navigate to="/" replace />
+//             ) : (
+//               <Signup setIsAuthenticated={setIsAuthenticated} />
+//             )
+//           } 
+//         />
+        
+//         {/* Protected route */}
+   
+//         <Route
+//           path="/"
+//           element={
+//             isAuthenticated ? (
+//               <Home />
+//             ) : (
+//               <Navigate to="/login" replace />
+//             )
+//           }
+//         />
+        
+//         {/* Catch-all redirect */}
+//         <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />} />
+//       </Routes>
+//     </Router>
+//   );
+// }
+
+// export default App;
 
 
 
