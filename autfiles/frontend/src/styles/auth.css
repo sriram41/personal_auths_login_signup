@@ -33,7 +33,7 @@
   }
   
   .form-input {
-    width: 94%;
+    width: 94% !important;
     padding: 0.75rem;
     border: 1px solid #ddd;
     border-radius: 4px;
