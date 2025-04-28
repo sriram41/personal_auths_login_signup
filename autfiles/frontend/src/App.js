@@ -24,7 +24,7 @@ function App() {
 
   return (
     <Router>
-      <Navbar isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />
+     
       <Routes>
         {/* Public routes */}
         <Route path="/about" element={<About />} />
@@ -52,6 +52,7 @@ function App() {
         />
         
         {/* Protected route */}
+    <Navbar isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />
         <Route
           path="/"
           element={
