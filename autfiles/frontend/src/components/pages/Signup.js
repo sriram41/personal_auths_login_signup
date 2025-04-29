@@ -15,6 +15,7 @@ const Signup = ({ setIsAuthenticated }) => {
     setLoading(true);
     setError('');
 
+    // Client-side validation
     if (!name || !email || !password) {
       setError('All fields are required');
       setLoading(false);
@@ -26,16 +27,23 @@ const Signup = ({ setIsAuthenticated }) => {
       setLoading(false);
       return;
     }
-  
+
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL}/api/signup`,
+        'https://personal-auths-login-signup.onrender.com/api/signup',
         {
           name,
           email,
           password
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
         }
       );
+
+      console.log('Signup successful:', response.data);
       
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify({
@@ -43,11 +51,20 @@ const Signup = ({ setIsAuthenticated }) => {
         name: response.data.name
       }));
       setIsAuthenticated(true);
+      
     } catch (err) {
       console.error('Signup error:', err);
-      const errorMessage = err.response?.data?.message || 
-                         err.message || 
-                         'Signup failed. Please try again.';
+      
+      let errorMessage = 'Signup failed. Please try again.';
+      if (err.response) {
+        // Server responded with error status
+        errorMessage = err.response.data?.message || 
+                      `Server error: ${err.response.status}`;
+      } else if (err.request) {
+        // Request was made but no response received
+        errorMessage = 'No response from server. Check your connection.';
+      }
+      
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -57,10 +74,12 @@ const Signup = ({ setIsAuthenticated }) => {
   return (
     <div className="signup-container">
       <form className="signup-form" onSubmit={handleSubmit}>
-        <h1 className="signup-title">Signup</h1>
-        {error && <p className="error-message">{error}</p>}
+        <h1 className="signup-title">Sign Up</h1>
+        
+        {error && <div className="error-message">{error}</div>}
+        
         <div className="form-group">
-          <label className="form-label">Name:</label>
+          <label className="form-label">Full Name:</label>
           <input
             type="text"
             className="form-input"
@@ -70,8 +89,9 @@ const Signup = ({ setIsAuthenticated }) => {
             disabled={loading}
           />
         </div>
+        
         <div className="form-group">
-          <label className="form-label">Email:</label>
+          <label className="form-label">Email Address:</label>
           <input
             type="email"
             className="form-input"
@@ -81,6 +101,7 @@ const Signup = ({ setIsAuthenticated }) => {
             disabled={loading}
           />
         </div>
+        
         <div className="form-group">
           <label className="form-label">Password (min 6 characters):</label>
           <input
@@ -93,16 +114,18 @@ const Signup = ({ setIsAuthenticated }) => {
             disabled={loading}
           />
         </div>
+        
         <button 
           type="submit" 
           className="submit-btn"
           disabled={loading}
         >
-          {loading ? 'Creating account...' : 'Signup'}
+          {loading ? 'Creating Account...' : 'Sign Up'}
         </button>
-        <p className="login-link">
-          Already have an account? <Link to="/login">Login</Link>
-        </p>
+        
+        <div className="login-prompt">
+          Already have an account? <Link to="/login">Log in</Link>
+        </div>
       </form>
     </div>
   );
