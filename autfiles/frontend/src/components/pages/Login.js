@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import './Login.css';
 
-const Login = ({ setIsAuthenticated, apiBaseUrl }) => {
+const Login = ({ setIsAuthenticated }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -15,10 +15,13 @@ const Login = ({ setIsAuthenticated, apiBaseUrl }) => {
     setError('');
     
     try {
-      const response = await axios.post(`${apiBaseUrl}/api/login`, {
-        email,
-        password
-      });
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL}/api/login`, 
+        {
+          email,
+          password
+        }
+      );
 
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify({
@@ -28,7 +31,8 @@ const Login = ({ setIsAuthenticated, apiBaseUrl }) => {
       setIsAuthenticated(true);
       
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      console.error('Login error:', err);
+      setError(err.response?.data?.message || 'Login failed. Please try again.');
       setLoading(false);
     }
   };
@@ -80,7 +84,6 @@ const Login = ({ setIsAuthenticated, apiBaseUrl }) => {
 };
 
 export default Login;
-
 
 
 
