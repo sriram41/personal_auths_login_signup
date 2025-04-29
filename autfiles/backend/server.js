@@ -8,9 +8,16 @@ const jwt = require('jsonwebtoken');
 const app = express();
 
 // CORS Configuration
+// const allowedOrigins = [
+//   'https://sriram-khandavilli-personal-auths-login-signup.vercel.app',
+//   'http://localhost:3000'
+// ];
+
+
 const allowedOrigins = [
   'https://sriram-khandavilli-personal-auths-login-signup.vercel.app',
-  'http://localhost:3000'
+  'http://localhost:3000',
+  'https://personal-auths-login-signup.onrender.com' // Add this if your frontend is hosted here
 ];
 
 app.use(cors({
