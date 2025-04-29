@@ -69,16 +69,38 @@ const User = mongoose.model('User', UserSchema);
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
 
-// Routes
+
 app.post('/api/signup', async (req, res) => {
   try {
     const { name, email, password } = req.body;
     
-    // Validation
-    if (!name || !email || !password) {
+    // Enhanced validation with better error messages
+    if (!name && !email && !password) {
       return res.status(400).json({ 
         success: false,
-        message: 'All fields are required' 
+        message: 'All fields are required (name, email, password)',
+        received: req.body
+      });
+    }
+    
+    if (!name) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Name is required' 
+      });
+    }
+    
+    if (!email) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Email is required' 
+      });
+    }
+    
+    if (!password) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Password is required' 
       });
     }
     
@@ -120,10 +142,66 @@ app.post('/api/signup', async (req, res) => {
     console.error('Signup error:', error);
     res.status(500).json({ 
       success: false,
-      message: 'Server error' 
+      message: 'Server error',
+      error: error.message
     });
   }
 });
+// Routes
+// app.post('/api/signup', async (req, res) => {
+//   try {
+//     const { name, email, password } = req.body;
+    
+//     // Validation
+//     if (!name || !email || !password) {
+//       return res.status(400).json({ 
+//         success: false,
+//         message: 'All fields are required' 
+//       });
+//     }
+    
+//     // Check if user exists
+//     const existingUser = await User.findOne({ email });
+//     if (existingUser) {
+//       return res.status(400).json({ 
+//         success: false,
+//         message: 'User already exists' 
+//       });
+//     }
+    
+//     // Hash password
+//     const hashedPassword = await bcrypt.hash(password, 12);
+    
+//     // Create user
+//     const user = new User({ 
+//       name, 
+//       email, 
+//       password: hashedPassword 
+//     });
+    
+//     await user.save();
+    
+//     // Generate token
+//     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { 
+//       expiresIn: JWT_EXPIRES_IN 
+//     });
+    
+//     res.status(201).json({ 
+//       success: true,
+//       token, 
+//       userId: user._id, 
+//       name: user.name,
+//       message: 'User created successfully'
+//     });
+    
+//   } catch (error) {
+//     console.error('Signup error:', error);
+//     res.status(500).json({ 
+//       success: false,
+//       message: 'Server error' 
+//     });
+//   }
+// });
 
 app.post('/api/login', async (req, res) => {
   try {
