@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
@@ -7,22 +6,22 @@ import About from './components/pages/About';
 import Login from './components/pages/Login';
 import Signup from './components/pages/Signup';
 
-// Base API URL - points to your Render backend
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 
-  'https://personal-auths-login-signup.onrender.com';
-
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    setIsAuthenticated(!!token);
+    const user = localStorage.getItem('user');
+    
+    if (token && user) {
+      setIsAuthenticated(true);
+    }
     setLoading(false);
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="loading-spinner">Loading...</div>;
   }
 
   return (
@@ -33,7 +32,7 @@ function App() {
           isAuthenticated ? (
             <Navigate to="/" replace />
           ) : (
-            <Login setIsAuthenticated={setIsAuthenticated} apiBaseUrl={API_BASE_URL} />
+            <Login setIsAuthenticated={setIsAuthenticated} />
           )
         } />
         
@@ -41,7 +40,7 @@ function App() {
           isAuthenticated ? (
             <Navigate to="/" replace />
           ) : (
-            <Signup setIsAuthenticated={setIsAuthenticated} apiBaseUrl={API_BASE_URL} />
+            <Signup setIsAuthenticated={setIsAuthenticated} />
           )
         } />
 
@@ -72,8 +71,6 @@ function App() {
 }
 
 export default App;
-
-
 
 
 
