@@ -11,7 +11,9 @@ const Signup = ({ setIsAuthenticated }) => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const API_BASE_URL = 'https://personal-auths-login-signup.onrender.com';
+  // Use environment variable or fallback to Render URL
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 
+                      'https://personal-auths-login-signup.onrender.com';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,6 +40,8 @@ const Signup = ({ setIsAuthenticated }) => {
     }
 
     try {
+      console.log('Sending signup request to:', `${API_BASE_URL}/api/signup`);
+      
       const response = await axios.post(
         `${API_BASE_URL}/api/signup`,
         {
@@ -55,35 +59,26 @@ const Signup = ({ setIsAuthenticated }) => {
 
       console.log('Signup successful:', response.data);
       
-      // Store authentication data
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify({
         userId: response.data.userId,
         name: response.data.name
       }));
       
-      // Update auth state and redirect
       setIsAuthenticated(true);
-      navigate('/'); // Redirect to home page after successful signup
+      navigate('/');
       
     } catch (err) {
-      console.error('Signup error:', err);
+      console.error('Full error details:', err);
       
       let errorMessage = 'Signup failed. Please try again.';
-      if (err.response) {
-        // Server responded with error status
+      if (err.code === 'ECONNABORTED') {
+        errorMessage = 'Connection timeout. Please try again.';
+      } else if (err.message === 'Network Error') {
+        errorMessage = 'Cannot connect to server. Please check your internet connection.';
+      } else if (err.response) {
         errorMessage = err.response.data?.message || 
                       `Server error: ${err.response.status}`;
-      } else if (err.request) {
-        // Request was made but no response received
-        if (err.code === 'ECONNABORTED') {
-          errorMessage = 'Request timeout. Please check your connection.';
-        } else {
-          errorMessage = 'No response from server. The backend might be down.';
-        }
-      } else {
-        // Other errors
-        errorMessage = err.message || 'An unexpected error occurred';
       }
       
       setError(errorMessage);
@@ -95,7 +90,7 @@ const Signup = ({ setIsAuthenticated }) => {
   return (
     <div className="signup-container">
       <form className="signup-form" onSubmit={handleSubmit}>
-        <h1 className="signup-title">Create Account</h1>
+        <h1 className="signup-title">Sign Up</h1>
         
         {error && <div className="error-message">{error}</div>}
         
@@ -108,7 +103,6 @@ const Signup = ({ setIsAuthenticated }) => {
             onChange={(e) => setName(e.target.value)}
             required
             disabled={loading}
-            placeholder="Enter your full name"
           />
         </div>
         
@@ -121,7 +115,6 @@ const Signup = ({ setIsAuthenticated }) => {
             onChange={(e) => setEmail(e.target.value)}
             required
             disabled={loading}
-            placeholder="Enter your email"
           />
         </div>
         
@@ -135,8 +128,8 @@ const Signup = ({ setIsAuthenticated }) => {
             required
             minLength="6"
             disabled={loading}
-            placeholder="At least 6 characters"
           />
+          <small className="password-hint">(Minimum 6 characters)</small>
         </div>
         
         <button 
@@ -144,17 +137,11 @@ const Signup = ({ setIsAuthenticated }) => {
           className="submit-btn"
           disabled={loading}
         >
-          {loading ? (
-            <>
-              <span className="spinner"></span> Creating Account...
-            </>
-          ) : (
-            'Sign Up'
-          )}
+          {loading ? 'Creating Account...' : 'Sign Up'}
         </button>
         
         <div className="login-prompt">
-          Already have an account? <Link to="/login" className="login-link">Log in</Link>
+          Already have an account? <Link to="/login">Log in</Link>
         </div>
       </form>
     </div>
