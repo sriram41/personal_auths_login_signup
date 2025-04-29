@@ -7,10 +7,11 @@ const jwt = require('jsonwebtoken');
 
 const app = express();
 
+
 // Enhanced CORS configuration
 const allowedOrigins = [
   'https://sriram-khandavilli-personal-auths-login-signup.vercel.app',
-  'http://localhost:3000'
+  'http://localhost:3000' // For development
 ];
 
 app.use(cors({
@@ -28,6 +29,28 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// // Enhanced CORS configuration
+// const allowedOrigins = [
+//   'https://sriram-khandavilli-personal-auths-login-signup.vercel.app',
+//   'http://localhost:3000'
+// ];
+
+// app.use(cors({
+//   origin: function (origin, callback) {
+//     // Allow requests with no origin (like mobile apps or curl requests)
+//     if (!origin) return callback(null, true);
+    
+//     if (allowedOrigins.indexOf(origin) !== -1) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error('Not allowed by CORS'));
+//     }
+//   },
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+//   allowedHeaders: ['Content-Type', 'Authorization']
+// }));
 
 app.use(express.json());
 
