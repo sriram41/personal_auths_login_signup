@@ -4,36 +4,41 @@ import axios from 'axios';
 import './Signup.css';
 
 const Signup = ({ setIsAuthenticated }) => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: ''
+  });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Updated API base URL - make sure this matches your backend URL
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 
                       'https://personal-auths-login-signup.onrender.com';
+
+  const handleChange = (e) => {
+    setFormData({...formData, [e.target.name]: e.target.value});
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    // Client-side validation
-    if (!name || !email || !password) {
+    // Validation
+    if (!formData.name || !formData.email || !formData.password) {
       setError('All fields are required');
       setLoading(false);
       return;
     }
 
-    if (password.length < 6) {
+    if (formData.password.length < 6) {
       setError('Password must be at least 6 characters');
       setLoading(false);
       return;
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       setError('Please enter a valid email address');
       setLoading(false);
       return;
@@ -42,17 +47,13 @@ const Signup = ({ setIsAuthenticated }) => {
     try {
       const response = await axios.post(
         `${API_BASE_URL}/api/signup`,
-        {
-          name,
-          email,
-          password
-        },
+        formData,
         {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           },
-          timeout: 15000 // 15 second timeout
+          timeout: 10000
         }
       );
 
@@ -68,7 +69,6 @@ const Signup = ({ setIsAuthenticated }) => {
       } else {
         setError(response.data.message || 'Signup failed');
       }
-      
     } catch (err) {
       console.error('Signup error:', err);
       
@@ -76,10 +76,7 @@ const Signup = ({ setIsAuthenticated }) => {
       if (err.code === 'ECONNABORTED') {
         errorMessage = 'Request timeout. Please try again.';
       } else if (err.message === 'Network Error') {
-        errorMessage = 'Cannot connect to server. Please check:';
-        errorMessage += '\n1. Your internet connection';
-        errorMessage += '\n2. If the backend server is running';
-        errorMessage += '\n3. The correct API URL is being used';
+        errorMessage = `Cannot connect to server at ${API_BASE_URL}`;
       } else if (err.response) {
         errorMessage = err.response.data?.message || 
                       `Server error: ${err.response.status}`;
@@ -102,9 +99,10 @@ const Signup = ({ setIsAuthenticated }) => {
           <label className="form-label">Full Name:</label>
           <input
             type="text"
+            name="name"
             className="form-input"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={formData.name}
+            onChange={handleChange}
             required
             disabled={loading}
           />
@@ -114,9 +112,10 @@ const Signup = ({ setIsAuthenticated }) => {
           <label className="form-label">Email Address:</label>
           <input
             type="email"
+            name="email"
             className="form-input"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={formData.email}
+            onChange={handleChange}
             required
             disabled={loading}
           />
@@ -126,9 +125,10 @@ const Signup = ({ setIsAuthenticated }) => {
           <label className="form-label">Password:</label>
           <input
             type="password"
+            name="password"
             className="form-input"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={formData.password}
+            onChange={handleChange}
             required
             minLength="6"
             disabled={loading}
