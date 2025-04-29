@@ -10,12 +10,15 @@ const app = express();
 // Enhanced CORS configuration
 const allowedOrigins = [
   'https://sriram-khandavilli-personal-auths-login-signup.vercel.app',
-  'http://localhost:3000' // For local development
+  'http://localhost:3000'
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
