@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import './Signup.css';
-import '../../styles/auth.css';
 
 const Signup = ({ setIsAuthenticated }) => {
   const [name, setName] = useState('');
@@ -29,22 +28,14 @@ const Signup = ({ setIsAuthenticated }) => {
     }
   
     try {
-      console.log('Attempting signup...');
       const response = await axios.post(
-        'https://personal-auths-login-signup.onrender.com/api/signup', 
+        `${process.env.REACT_APP_API_BASE_URL}/api/signup`,
         {
           name,
           email,
           password
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
         }
       );
-      
-      console.log('Signup successful:', response.data);
       
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify({
@@ -53,19 +44,10 @@ const Signup = ({ setIsAuthenticated }) => {
       }));
       setIsAuthenticated(true);
     } catch (err) {
-      console.error('Full error object:', err);
-      console.error('Error response:', err.response);
-      
-      let errorMessage = 'Signup failed';
-      if (err.response) {
-        errorMessage = err.response.data?.message || 
-                     `Server error: ${err.response.status}`;
-      } else if (err.request) {
-        errorMessage = 'No response from server - check your network connection';
-      } else {
-        errorMessage = err.message || 'Request setup error';
-      }
-      
+      console.error('Signup error:', err);
+      const errorMessage = err.response?.data?.message || 
+                         err.message || 
+                         'Signup failed. Please try again.';
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -127,7 +109,6 @@ const Signup = ({ setIsAuthenticated }) => {
 };
 
 export default Signup;
-
 
 
 
