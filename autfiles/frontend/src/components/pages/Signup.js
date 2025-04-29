@@ -11,7 +11,7 @@ const Signup = ({ setIsAuthenticated }) => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Use environment variable or fallback to Render URL
+  // Updated API base URL - make sure this matches your backend URL
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 
                       'https://personal-auths-login-signup.onrender.com';
 
@@ -33,15 +33,13 @@ const Signup = ({ setIsAuthenticated }) => {
       return;
     }
 
-    if (!email.includes('@')) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setError('Please enter a valid email address');
       setLoading(false);
       return;
     }
 
     try {
-      console.log('Sending signup request to:', `${API_BASE_URL}/api/signup`);
-      
       const response = await axios.post(
         `${API_BASE_URL}/api/signup`,
         {
@@ -51,31 +49,37 @@ const Signup = ({ setIsAuthenticated }) => {
         },
         {
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
           },
-          timeout: 10000 // 10 second timeout
+          timeout: 15000 // 15 second timeout
         }
       );
 
-      console.log('Signup successful:', response.data);
-      
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify({
-        userId: response.data.userId,
-        name: response.data.name
-      }));
-      
-      setIsAuthenticated(true);
-      navigate('/');
+      if (response.data.success) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify({
+          userId: response.data.userId,
+          name: response.data.name
+        }));
+        
+        setIsAuthenticated(true);
+        navigate('/');
+      } else {
+        setError(response.data.message || 'Signup failed');
+      }
       
     } catch (err) {
-      console.error('Full error details:', err);
+      console.error('Signup error:', err);
       
       let errorMessage = 'Signup failed. Please try again.';
       if (err.code === 'ECONNABORTED') {
-        errorMessage = 'Connection timeout. Please try again.';
+        errorMessage = 'Request timeout. Please try again.';
       } else if (err.message === 'Network Error') {
-        errorMessage = 'Cannot connect to server. Please check your internet connection.';
+        errorMessage = 'Cannot connect to server. Please check:';
+        errorMessage += '\n1. Your internet connection';
+        errorMessage += '\n2. If the backend server is running';
+        errorMessage += '\n3. The correct API URL is being used';
       } else if (err.response) {
         errorMessage = err.response.data?.message || 
                       `Server error: ${err.response.status}`;
@@ -149,7 +153,6 @@ const Signup = ({ setIsAuthenticated }) => {
 };
 
 export default Signup;
-
 
 
 
