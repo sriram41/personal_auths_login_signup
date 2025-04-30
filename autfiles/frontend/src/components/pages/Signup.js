@@ -13,8 +13,8 @@ const Signup = ({ setIsAuthenticated }) => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 
-                      'https://personal-auths-login-signup.onrender.com';
+  // Use the render URL directly as fallback
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://personal-auths-login-signup.onrender.com';
 
   const handleChange = (e) => {
     setFormData({...formData, [e.target.name]: e.target.value});
@@ -25,15 +25,15 @@ const Signup = ({ setIsAuthenticated }) => {
     setLoading(true);
     setError('');
 
-    // Validation
-    if (!formData.name || !formData.email || !formData.password) {
-      setError('All fields are required');
+    // Enhanced validation
+    if (!formData.name.trim()) {
+      setError('Name is required');
       setLoading(false);
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
+    if (!formData.email.trim()) {
+      setError('Email is required');
       setLoading(false);
       return;
     }
@@ -44,7 +44,21 @@ const Signup = ({ setIsAuthenticated }) => {
       return;
     }
 
+    if (!formData.password) {
+      setError('Password is required');
+      setLoading(false);
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
+      setLoading(false);
+      return;
+    }
+
     try {
+      console.log('Attempting to signup with URL:', `${API_BASE_URL}/api/signup`);
+      
       const response = await axios.post(
         `${API_BASE_URL}/api/signup`,
         formData,
@@ -53,9 +67,12 @@ const Signup = ({ setIsAuthenticated }) => {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           },
-          timeout: 10000
+          withCredentials: true, // Important for CORS with credentials
+          timeout: 15000 // Increased timeout
         }
       );
+
+      console.log('Signup response:', response.data);
 
       if (response.data.success) {
         localStorage.setItem('token', response.data.token);
@@ -76,10 +93,20 @@ const Signup = ({ setIsAuthenticated }) => {
       if (err.code === 'ECONNABORTED') {
         errorMessage = 'Request timeout. Please try again.';
       } else if (err.message === 'Network Error') {
-        errorMessage = `Cannot connect to server at ${API_BASE_URL}`;
+        errorMessage = `Cannot connect to server. Please check your internet connection.`;
+        if (API_BASE_URL) {
+          errorMessage += ` (Tried to reach: ${API_BASE_URL})`;
+        }
       } else if (err.response) {
-        errorMessage = err.response.data?.message || 
-                      `Server error: ${err.response.status}`;
+        // More detailed error messages based on status code
+        if (err.response.status === 400) {
+          errorMessage = err.response.data?.message || 'Invalid request data';
+        } else if (err.response.status === 500) {
+          errorMessage = 'Server error. Please try again later.';
+        } else {
+          errorMessage = err.response.data?.message || 
+                        `Server returned status ${err.response.status}`;
+        }
       }
       
       setError(errorMessage);
@@ -88,71 +115,169 @@ const Signup = ({ setIsAuthenticated }) => {
     }
   };
 
-  return (
-    <div className="signup-container">
-      <form className="signup-form" onSubmit={handleSubmit}>
-        <h1 className="signup-title">Sign Up</h1>
-        
-        {error && <div className="error-message">{error}</div>}
-        
-        <div className="form-group">
-          <label className="form-label">Full Name:</label>
-          <input
-            type="text"
-            name="name"
-            className="form-input"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            disabled={loading}
-          />
-        </div>
-        
-        <div className="form-group">
-          <label className="form-label">Email Address:</label>
-          <input
-            type="email"
-            name="email"
-            className="form-input"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            disabled={loading}
-          />
-        </div>
-        
-        <div className="form-group">
-          <label className="form-label">Password:</label>
-          <input
-            type="password"
-            name="password"
-            className="form-input"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            minLength="6"
-            disabled={loading}
-          />
-          <small className="password-hint">(Minimum 6 characters)</small>
-        </div>
-        
-        <button 
-          type="submit" 
-          className="submit-btn"
-          disabled={loading}
-        >
-          {loading ? 'Creating Account...' : 'Sign Up'}
-        </button>
-        
-        <div className="login-prompt">
-          Already have an account? <Link to="/login">Log in</Link>
-        </div>
-      </form>
-    </div>
-  );
+  // ... rest of the component remains the same ...
 };
 
 export default Signup;
+
+
+
+
+// import { useState } from 'react';
+// import { Link, useNavigate } from 'react-router-dom';
+// import axios from 'axios';
+// import './Signup.css';
+
+// const Signup = ({ setIsAuthenticated }) => {
+//   const [formData, setFormData] = useState({
+//     name: '',
+//     email: '',
+//     password: ''
+//   });
+//   const [error, setError] = useState('');
+//   const [loading, setLoading] = useState(false);
+//   const navigate = useNavigate();
+
+//   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 
+//                       'https://personal-auths-login-signup.onrender.com';
+
+//   const handleChange = (e) => {
+//     setFormData({...formData, [e.target.name]: e.target.value});
+//   };
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     setLoading(true);
+//     setError('');
+
+//     // Validation
+//     if (!formData.name || !formData.email || !formData.password) {
+//       setError('All fields are required');
+//       setLoading(false);
+//       return;
+//     }
+
+//     if (formData.password.length < 6) {
+//       setError('Password must be at least 6 characters');
+//       setLoading(false);
+//       return;
+//     }
+
+//     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+//       setError('Please enter a valid email address');
+//       setLoading(false);
+//       return;
+//     }
+
+//     try {
+//       const response = await axios.post(
+//         `${API_BASE_URL}/api/signup`,
+//         formData,
+//         {
+//           headers: {
+//             'Content-Type': 'application/json',
+//             'Accept': 'application/json'
+//           },
+//           timeout: 10000
+//         }
+//       );
+
+//       if (response.data.success) {
+//         localStorage.setItem('token', response.data.token);
+//         localStorage.setItem('user', JSON.stringify({
+//           userId: response.data.userId,
+//           name: response.data.name
+//         }));
+        
+//         setIsAuthenticated(true);
+//         navigate('/');
+//       } else {
+//         setError(response.data.message || 'Signup failed');
+//       }
+//     } catch (err) {
+//       console.error('Signup error:', err);
+      
+//       let errorMessage = 'Signup failed. Please try again.';
+//       if (err.code === 'ECONNABORTED') {
+//         errorMessage = 'Request timeout. Please try again.';
+//       } else if (err.message === 'Network Error') {
+//         errorMessage = `Cannot connect to server at ${API_BASE_URL}`;
+//       } else if (err.response) {
+//         errorMessage = err.response.data?.message || 
+//                       `Server error: ${err.response.status}`;
+//       }
+      
+//       setError(errorMessage);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div className="signup-container">
+//       <form className="signup-form" onSubmit={handleSubmit}>
+//         <h1 className="signup-title">Sign Up</h1>
+        
+//         {error && <div className="error-message">{error}</div>}
+        
+//         <div className="form-group">
+//           <label className="form-label">Full Name:</label>
+//           <input
+//             type="text"
+//             name="name"
+//             className="form-input"
+//             value={formData.name}
+//             onChange={handleChange}
+//             required
+//             disabled={loading}
+//           />
+//         </div>
+        
+//         <div className="form-group">
+//           <label className="form-label">Email Address:</label>
+//           <input
+//             type="email"
+//             name="email"
+//             className="form-input"
+//             value={formData.email}
+//             onChange={handleChange}
+//             required
+//             disabled={loading}
+//           />
+//         </div>
+        
+//         <div className="form-group">
+//           <label className="form-label">Password:</label>
+//           <input
+//             type="password"
+//             name="password"
+//             className="form-input"
+//             value={formData.password}
+//             onChange={handleChange}
+//             required
+//             minLength="6"
+//             disabled={loading}
+//           />
+//           <small className="password-hint">(Minimum 6 characters)</small>
+//         </div>
+        
+//         <button 
+//           type="submit" 
+//           className="submit-btn"
+//           disabled={loading}
+//         >
+//           {loading ? 'Creating Account...' : 'Sign Up'}
+//         </button>
+        
+//         <div className="login-prompt">
+//           Already have an account? <Link to="/login">Log in</Link>
+//         </div>
+//       </form>
+//     </div>
+//   );
+// };
+
+// export default Signup;
 
 
 
